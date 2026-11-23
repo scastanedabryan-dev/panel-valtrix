@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Panel Valtrix</title>
+
+  <!-- Configuración App iPhone (Safari -> Agregar a pantalla de inicio) -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Panel Valtrix" />
+  <meta name="theme-color" content="#0b0f0e" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230b0f0e'/%3E%3Ccircle cx='90' cy='90' r='72' fill='%23122b22' stroke='%232dd4a0' stroke-width='4'/%3E%3Ctext x='90' y='118' font-family='-apple-system,sans-serif' font-size='84' font-weight='900' fill='%23ffffff' text-anchor='middle'%3EV%3C/text%3E%3C/svg%3E" />
+
+  <style>
+    :root {
+      --bg-body: #0b0f0e;
+      --bg-card: #121716;
+      --bg-card-inner: #181e1c;
+      --border-card: #232b29;
+      --text-white: #ffffff;
+      --text-muted: #9ca8a4;
+      --text-dim: #6c7874;
+      --teal-conductor: #2dd4a0;
+      --amber-dispatcher: #f5a623;
+      --coral-factoring: #eb5757;
+      --gray-diesel: #8e9693;
+      --purple-gastos: #a78bfa;
+      --green-glow: #15382b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-white);
+      padding: calc(env(safe-area-inset-top, 16px) + 8px) 16px calc(env(safe-area-inset-bottom, 24px) + 32px) 16px;
+      max-width: 540px;
+      margin: 0 auto;
+      line-height: 1.4;
+    }
+
+    .brand-title {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-white);
+      line-height: 1.05;
+    }
+    .brand-sub {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2.2px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      margin-bottom: 14px;
+      text-transform: uppercase;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #141a18;
+      border: 1px solid #26302d;
+      border-radius: 999px;
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #d5dfdc;
+      margin-bottom: 16px;
+    }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 8px #22c55e;
+      flex-shrink: 0;
+    }
+
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+      margin-bottom: 12px;
+    }
+    .week-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 14px;
+      padding: 11px 10px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      color: var(--text-white);
+    }
+    .week-btn .w-title {
+      font-size: 14.5px;
+      font-weight: 800;
+      display: block;
+    }
+    .week-btn .w-sub {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .week-btn.active {
+      background: #ffffff;
+      border-color: #ffffff;
+      color: #0b0f0e;
+    }
+    .week-btn.active .w-sub {
+      color: #4b5552;
+      font-weight: 600;
+    }
+
+    .matrix-toggle-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #162821 0%, #121b18 100%);
+      border: 1px solid #2dd4a0;
+      border-radius: 14px;
+      padding: 12px 14px;
+      color: #ffffff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      margin-bottom: 18px;
+      font-size: 13.5px;
+      font-weight: 800;
+    }
+    .matrix-toggle-btn span.sub {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #2dd4a0;
+    }
+
+    .hero-card {
+      position: relative;
+      overflow: hidden;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 22px;
+      padding: 22px 18px;
+      margin-bottom: 16px;
+    }
+    .hero-glow {
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      width: 190px;
+      height: 190px;
+      border-radius: 50%;
+      background: rgba(29, 122, 88, 0.28);
+      pointer-events: none;
+    }
+    .hero-kicker {
+      position: relative;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+      color: #d1dbd7;
+    }
+    .hero-dates {
+      position: relative;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      margin-bottom: 20px;
+    }
+    .hero-center {
+      position: relative;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .hero-net-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #c5d1cd;
+      margin-bottom: 4px;
+    }
+    .hero-net-val {
+      font-size: 52px;
+      font-weight: 900;
+      letter-spacing: -1.5px;
+      line-height: 1;
+      color: var(--text-white);
+    }
+    .hero-net-val .cents {
+      font-size: 28px;
+      font-weight: 800;
+    }
+    .hero-net-caption {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .rpm-banner {
+      background: #14221d;
+      border: 1px solid rgba(45, 212, 160, 0.35);
+      border-radius: 14px;
+      padding: 11px 13px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .rpm-banner .rpm-left {
+      font-size: 11.5px;
+      color: #c5d6d0;
+    }
+    .rpm-banner .rpm-left b {
+      color: #2dd4a0;
+      font-size: 13px;
+    }
+
+    .kpi-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .kpi-box {
+      background: var(--bg-card-inner);
+      border: 1px solid #252e2c;
+      border-radius: 14px;
+      padding: 13px 14px;
+    }
+    .kpi-box .k {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .kpi-box .v {
+      font-size: 21px;
+      font-weight: 800;
+      color: var(--text-white);
+      margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .split-bar {
+      position: relative;
+      display: flex;
+      height: 12px;
+      width: 100%;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #1d2422;
+      margin-bottom: 12px;
+    }
+    .split-seg {
+      height: 100%;
+    }
+    .legend {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      font-size: 12px;
+      color: #c2ceca;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-white);
+    }
+    .section-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    /* Tabla Matriz Consolidada (Semanas 40 a 46) */
+    .matrix-card {
+      background: linear-gradient(160deg, #131b19 0%, #101514 100%);
+      border: 1px solid #2b3c37;
+      border-radius: 20px;
+      padding: 18px 14px;
+      margin-bottom: 16px;
+    }
+    .table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-top: 8px;
+      border-radius: 12px;
+      border: 1px solid #222c29;
+    }
+    table.matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      min-width: 480px;
+    }
+    table.matrix-table th {
+      background: #18221f;
+      color: #a9b8b3;
+      text-align: right;
+      padding: 9px 8px;
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      border-bottom: 1px solid #26322f;
+    }
+    table.matrix-table th:first-child,
+    table.matrix-table td:first-child {
+      text-align: left;
+      position: sticky;
+      left: 0;
+      background: #141c1a;
+      z-index: 1;
+      font-weight: 800;
+    }
+    table.matrix-table td {
+      padding: 9px 8px;
+      text-align: right;
+      border-bottom: 1px solid #1c2422;
+      color: #e2ece9;
+    }
+    table.matrix-table tr.active-row td {
+      background: rgba(45, 212, 160, 0.11);
+      font-weight: 700;
+    }
+    table.matrix-table tr.total-row td {
+      background: #182420;
+      font-weight: 900;
+      color: #ffffff;
+      border-top: 2px solid #2dd4a0;
+      border-bottom: none;
+    }
+
+    .oil-card {
+      background: linear-gradient(145deg, #151c1a 0%, #111615 100%);
+      border: 1px solid #2dd4a0;
+      border-radius: 20px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .oil-pill {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(45, 212, 160, 0.16);
+      color: #2dd4a0;
+      border: 1px solid rgba(45, 212, 160, 0.4);
+    }
+    .oil-pill.urgent {
+      background: rgba(239, 68, 68, 0.18);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.45);
+    }
+    .oil-progress-bg {
+      height: 10px;
+      background: #1d2422;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+    .oil-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #2dd4a0 0%, #f5a623 75%, #eb5757 100%);
+      border-radius: 999px;
+    }
+    .oil-input-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .oil-input {
+      flex: 1;
+      background: #0b0f0e;
+      border: 1px solid #2b3532;
+      border-radius: 10px;
+      padding: 10px 12px;
+      color: #fff;
+      font-size: 14px;
+    }
+    .oil-btn {
+      background: #2dd4a0;
+      color: #0b0f0e;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 12.5px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .oil-btn.reset {
+      background: #f5a623;
+      color: #0b0f0e;
+    }
+
+    .row-item {
+      padding: 13px 0;
+      border-top: 1px solid #1e2624;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .row-item:first-of-type {
+      border-top: none;
+      padding-top: 4px;
+    }
+    .row-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-white);
+    }
+    .row-sub {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .row-right {
+      text-align: right;
+      white-space: nowrap;
+    }
+    .row-amount {
+      font-size: 17px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+    .tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 6px;
+      margin-top: 4px;
+      text-transform: uppercase;
+    }
+    .tag.ok {
+      background: rgba(45, 212, 160, 0.15);
+      color: #2dd4a0;
+    }
+    .tag.prov {
+      background: rgba(245, 166, 35, 0.16);
+      color: #f5a623;
+    }
+    .tag.miss {
+      background: rgba(235, 87, 87, 0.18);
+      color: #f87171;
+    }
+
+    .empty-state {
+      background: var(--bg-card-inner);
+      border: 1px dashed #2c3633;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .btn-whatsapp {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 14px;
+      background: #2dd4a0;
+      color: #0b0f0e;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 4px;
+      margin-bottom: 12px;
+    }
+    .footer-note {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="brand-title">VALTRIX</div>
+  <div class="brand-sub">TRANSPORT LLC · MC 1803242 · TRUCK 001 (GMT421)</div>
+
+  <div class="status-pill">
+    <span class="status-dot"></span>
+    <span>En vivo · 23 nov 2026 · Sem 48 EN CURSO (1 carga $2,550 · Daniel 25% · $0 diésel)</span>
+  </div>
+
+  <!-- Grid de Semanas 48 a 43 -->
+  <div class="week-grid" id="weekGrid"><button class="week-btn active" onclick="selectWeek(48)"><span class="w-title">Semana 48</span><span class="w-sub">24–30 nov · En curso</span></button>
+<button class="week-btn " onclick="selectWeek(47)"><span class="w-title">Semana 47</span><span class="w-sub">17–23 nov · Cerrada</span></button>
+<button class="week-btn " onclick="selectWeek(46)"><span class="w-title">Semana 46</span><span class="w-sub">10–16 nov · Cerrada</span></button>
+<button class="week-btn " onclick="selectWeek(45)"><span class="w-title">Semana 45</span><span class="w-sub">3–9 nov · Cerrada</span></button>
+<button class="week-btn " onclick="selectWeek(44)"><span class="w-title">Semana 44</span><span class="w-sub">27 oct–2 nov · Cerrada</span></button>
+<button class="week-btn " onclick="selectWeek(43)"><span class="w-title">Semana 43</span><span class="w-sub">20–26 oct · Cerrada</span></button>
+<button class="week-btn " onclick="selectWeek(42)"><span class="w-title">Semana 42</span><span class="w-sub">13–19 oct · Cerrada</span></button>
+<button class="week-btn " onclick="selectWeek(41)"><span class="w-title">Semana 41</span><span class="w-sub">6–12 oct · Cerrada</span></button>
+<button class="week-btn " onclick="selectWeek(40)"><span class="w-title">Semana 40</span><span class="w-sub">29 sep–5 oct · Cerrada</span></button></div>
+
+  <!-- Botón acceso rápido a la Matriz Consolidada -->
+  <button class="matrix-toggle-btn" onclick="document.getElementById('matrixSection').scrollIntoView({behavior:'smooth'})">
+    <span>📋 Matriz / Resumen Histórico Valtrix (Sem 40 – 48)</span>
+    <span class="sub">Ver tabla ↓</span>
+  </button>
+
+  <!-- Tarjeta Hero Principal -->
+  <div class="hero-card">
+    <div class="hero-glow"></div>
+    <div class="hero-kicker" id="heroKicker">SEMANA 48 — PANEL PARA BRYAN Y KAREN</div>
+    <div class="hero-dates" id="heroDates">Martes 24 nov → Lunes 30 nov 2026 · En curso</div>
+
+    <div class="hero-center">
+      <div class="hero-net-label" id="heroNetLabel">NETA EN CURSO SEMANA 48 (ANTES DE DIÉSEL)</div>
+      <div class="hero-net-val" id="heroNetVal">$1,652<span class="cents">.40</span></div>
+      <div class="hero-net-caption" id="heroNetCaption">1 carga ($2,550 · Falta POD · Daniel 25%) + $0 diésel · $0 gastos</div>
+    </div>
+
+    <div class="rpm-banner" id="rpmBanner">
+      <div class="rpm-left" id="rpmBannerText">
+        🛣️ <b>A cómo nos sale la milla:</b> $1.89/mi cargada (~1,350 mi prov.) · <b>$1.81/mi total con vacías</b> (~1,410 mi prov.) · <b>$1.17/mi libre antes de diésel</b>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-box">
+        <div class="k">BRUTO</div>
+        <div class="v" id="kpiGross">$2,550.00</div>
+      </div>
+      <div class="kpi-box">
+        <div class="k">DIÉSEL</div>
+        <div class="v" id="kpiDiesel">$0.00</div>
+      </div>
+      <div class="kpi-box">
+        <div class="k">GALONES</div>
+        <div class="v" id="kpiGal">0.000 gal</div>
+      </div>
+      <div class="kpi-box">
+        <div class="k">GASTOS SEM.</div>
+        <div class="v" style="color:#a78bfa;" id="kpiExpenses">$0.00</div>
+      </div>
+    </div>
+
+    <div class="split-bar" id="splitBar"><div class="split-seg" style="width:25%;background:var(--teal-conductor)"></div><div class="split-seg" style="width:7.000000000000001%;background:var(--amber-dispatcher)"></div><div class="split-seg" style="width:3.2%;background:var(--coral-factoring)"></div><div class="split-seg" style="width:64.8%;background:#ffffff"></div></div>
+    <div class="legend" id="splitLegend"><div class="legend-item"><span class="dot" style="background:var(--teal-conductor)"></span>Conductor 25%</div><div class="legend-item"><span class="dot" style="background:var(--amber-dispatcher)"></span>Dispatcher 7%</div><div class="legend-item"><span class="dot" style="background:var(--coral-factoring)"></span>Factoring 3.2%</div><div class="legend-item"><span class="dot" style="background:var(--gray-diesel)"></span>Diésel</div><div class="legend-item"><span class="dot" style="background:#ffffff"></span>Neta</div></div>
+  </div>
+
+  <!-- MATRIZ MAESTRA VALTRIX (Resúmenes de todas las semanas en un solo lugar) -->
+  <div class="matrix-card" id="matrixSection">
+    <div class="section-header">
+      <div class="section-title">📋 Matriz Maestra Valtrix (Resúmenes)</div>
+      <span class="tag ok">Sem 40 a 48</span>
+    </div>
+    <div class="section-desc">
+      Toca cualquier fila para abrir el detalle completo de esa semana arriba.
+    </div>
+    <div class="table-wrap">
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th>Semana</th>
+            <th>Bruto</th>
+            <th>Conductor</th>
+            <th>Henry 7%</th>
+            <th>Fact. 3.2%</th>
+            <th>Diésel</th>
+            <th>Gastos</th>
+            <th>Neta Valtrix</th>
+          </tr>
+        </thead>
+        <tbody id="matrixBody"><tr class="active-row" onclick="selectWeek(48)" style="cursor:pointer;"><td>Sem 48 🟢</td><td>$2,550.00</td><td style="color:var(--teal-conductor)">-$637.50</td><td style="color:var(--amber-dispatcher)">-$178.50</td><td style="color:var(--coral-factoring)">-$81.60</td><td style="color:var(--gray-diesel)">-$0.00</td><td style="color:var(--purple-gastos)">-$0.00</td><td style="color:#2dd4a0;font-weight:800;">$1,652.40</td></tr>
+<tr class="" onclick="selectWeek(47)" style="cursor:pointer;"><td>Sem 47 </td><td>$2,900.00</td><td style="color:var(--teal-conductor)">-$725.00</td><td style="color:var(--amber-dispatcher)">-$203.00</td><td style="color:var(--coral-factoring)">-$92.80</td><td style="color:var(--gray-diesel)">-$916.70</td><td style="color:var(--purple-gastos)">-$0.00</td><td style="color:#2dd4a0;font-weight:800;">$962.50</td></tr>
+<tr class="" onclick="selectWeek(46)" style="cursor:pointer;"><td>Sem 46 </td><td>$8,750.00</td><td style="color:var(--teal-conductor)">-$2,210.00</td><td style="color:var(--amber-dispatcher)">-$595.00</td><td style="color:var(--coral-factoring)">-$280.00</td><td style="color:var(--gray-diesel)">-$2,514.30</td><td style="color:var(--purple-gastos)">-$166.42</td><td style="color:#2dd4a0;font-weight:800;">$2,984.28</td></tr>
+<tr class="" onclick="selectWeek(45)" style="cursor:pointer;"><td>Sem 45 </td><td>$4,550.00</td><td style="color:var(--teal-conductor)">-$1,183.00</td><td style="color:var(--amber-dispatcher)">-$318.50</td><td style="color:var(--coral-factoring)">-$145.60</td><td style="color:var(--gray-diesel)">-$1,716.60</td><td style="color:var(--purple-gastos)">-$388.64</td><td style="color:#2dd4a0;font-weight:800;">$797.66</td></tr>
+<tr class="" onclick="selectWeek(44)" style="cursor:pointer;"><td>Sem 44 </td><td>$6,000.00</td><td style="color:var(--teal-conductor)">-$1,482.00</td><td style="color:var(--amber-dispatcher)">-$399.00</td><td style="color:var(--coral-factoring)">-$193.60</td><td style="color:var(--gray-diesel)">-$1,794.99</td><td style="color:var(--purple-gastos)">-$5.00</td><td style="color:#2dd4a0;font-weight:800;">$2,125.41</td></tr>
+<tr class="" onclick="selectWeek(43)" style="cursor:pointer;"><td>Sem 43 </td><td>$7,550.00</td><td style="color:var(--teal-conductor)">-$1,963.00</td><td style="color:var(--amber-dispatcher)">-$528.50</td><td style="color:var(--coral-factoring)">-$241.60</td><td style="color:var(--gray-diesel)">-$2,136.79</td><td style="color:var(--purple-gastos)">-$0.00</td><td style="color:#2dd4a0;font-weight:800;">$2,680.11</td></tr>
+<tr class="" onclick="selectWeek(42)" style="cursor:pointer;"><td>Sem 42 </td><td>$4,489.62</td><td style="color:var(--teal-conductor)">-$962.00</td><td style="color:var(--amber-dispatcher)">-$259.00</td><td style="color:var(--coral-factoring)">-$134.56</td><td style="color:var(--gray-diesel)">-$1,327.19</td><td style="color:var(--purple-gastos)">-$284.62</td><td style="color:#2dd4a0;font-weight:800;">$1,522.25</td></tr>
+<tr class="" onclick="selectWeek(41)" style="cursor:pointer;"><td>Sem 41 </td><td>$9,040.00</td><td style="color:var(--teal-conductor)">-$2,314.00</td><td style="color:var(--amber-dispatcher)">-$357.00</td><td style="color:var(--coral-factoring)">-$289.28</td><td style="color:var(--gray-diesel)">-$2,302.22</td><td style="color:var(--purple-gastos)">-$0.00</td><td style="color:#2dd4a0;font-weight:800;">$3,777.50</td></tr>
+<tr class="" onclick="selectWeek(40)" style="cursor:pointer;"><td>Sem 40 </td><td>$8,700.00</td><td style="color:var(--teal-conductor)">-$2,262.00</td><td style="color:var(--amber-dispatcher)">-$609.00</td><td style="color:var(--coral-factoring)">-$278.40</td><td style="color:var(--gray-diesel)">-$1,932.39</td><td style="color:var(--purple-gastos)">-$0.00</td><td style="color:#2dd4a0;font-weight:800;">$3,618.21</td></tr>
+<tr class="total-row"><td>TOTAL (9 Sem)</td><td>$54,529.62</td><td>-$13,738.50</td><td>-$3,447.50</td><td>-$1,737.44</td><td>-$14,641.18</td><td>-$844.68</td><td style="color:#2dd4a0;">$20,120.32</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Cambio de Aceite (Truck 001 - GMT421) -->
+  <div class="oil-card">
+    <div class="section-header">
+      <div class="section-title">🛢️ Cambio de Aceite · Truck 001</div>
+      <span class="oil-pill" id="oilPill">✅ Recién cambiado (15,000 mi rest.)</span>
+    </div>
+    <div class="section-desc" id="oilDescText">
+      Cambio completado el <b>07-Nov-2026</b> en <b>TA Truck Service #305 (Petro San Antonio, TX · WO #2611005238)</b> a las <b>259,862 mi</b>.
+    </div>
+
+    <div class="kpi-grid" style="margin-bottom:10px;">
+      <div class="kpi-box">
+        <div class="k">CAMBIO ACTUAL (07-NOV)</div>
+        <div class="v" id="odoBaseVal">259,862 mi</div>
+      </div>
+      <div class="kpi-box">
+        <div class="k">PRÓXIMO CAMBIO (+15K)</div>
+        <div class="v" style="color:#2dd4a0;" id="odoTargetVal">274,862 mi</div>
+      </div>
+      <div class="kpi-box">
+        <div class="k">ODÓMETRO REGISTRADO (19-NOV)</div>
+        <div class="v" id="odoEstVal">264,935 mi</div>
+      </div>
+      <div class="kpi-box">
+        <div class="k">MILLAS RESTANTES</div>
+        <div class="v" style="color:#2dd4a0;" id="odoRemVal">9,927 mi</div>
+      </div>
+    </div>
+
+    <div class="oil-progress-bg">
+      <div class="oil-progress-fill" id="oilFill" style="width:33.8%;"></div>
+    </div>
+
+    <div class="oil-input-row">
+      <input type="number" id="odoInput" class="oil-input" placeholder="Actualizar odómetro (ej. 261492)" />
+      <button class="oil-btn" onclick="calcularAceite(false)">Guardar Millas</button>
+      <button class="oil-btn reset" onclick="calcularAceite(true)">Nuevo Cambio (+15k)</button>
+    </div>
+  </div>
+
+  <!-- Gastos por Semana (Agente 4) -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-title">🧾 Gastos por Semana (Agente 4)</div>
+      <span style="font-weight:800;color:#a78bfa;" id="gastosHeaderAmt">$0.00</span>
+    </div>
+    <div class="section-desc">
+      Carpeta Drive: <b>Gastos por Semana</b>. Todo gasto exige recibo enviado a <b>valtrixtransport@gmail.com</b> o al chat.
+    </div>
+    <div id="expensesList"><div class="empty-state"><b>$0.00 en Gastos Operativos en Semana 48.</b><br/>Cuando tengas un recibo de cambio de aceite, peaje, escala, reparación o deducción, mándalo a <b>valtrixtransport@gmail.com</b> o súbelo al chat.</div></div>
+  </div>
+
+  <!-- Desglose Contable -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-title">📊 Corte de la semana</div>
+    </div>
+    <div class="section-desc">Regla general: 25% Daniel (Sem 47+) / 26% Orlando (histórico) y 7% Henry sobre flete + accesorios; 3.2% factoring sobre el total.</div>
+    <div id="breakdownList">
+<div class="row-item"><div><div class="row-title">Ingreso Bruto</div><div class="row-sub">A cómo sale la milla: $1.89/mi cargada (~1,350 mi prov.) · $1.81/mi total con vacías (~1,410 mi prov.) · $1.17/mi libre antes de diésel</div></div><div class="row-right"><div class="row-amount">$2,550.00</div></div></div>
+<div class="row-item"><div><div class="row-title">Daniel (25%)</div><div class="row-sub">Conductor activo (25% · Vacaciones Orlando) · Truck 001</div></div><div class="row-right"><div class="row-amount" style="color:var(--teal-conductor)">-$637.50</div></div></div>
+<div class="row-item"><div><div class="row-title">Henry Abbets (7%)</div><div class="row-sub">Glitch Free Dispatch</div></div><div class="row-right"><div class="row-amount" style="color:var(--amber-dispatcher)">-$178.50</div></div></div>
+<div class="row-item"><div><div class="row-title">Factoring (3.2%)</div><div class="row-sub">Sobre el bruto total</div></div><div class="row-right"><div class="row-amount" style="color:var(--coral-factoring)">-$81.60</div></div></div>
+<div class="row-item"><div><div class="row-title">Diésel (0.000 gal)</div><div class="row-sub">Greenlane + Mudflap</div></div><div class="row-right"><div class="row-amount" style="color:var(--gray-diesel)">-$0.00</div></div></div>
+<div class="row-item"><div><div class="row-title">Gastos por Semana (Agente 4)</div><div class="row-sub">Gastos operativos de la semana</div></div><div class="row-right"><div class="row-amount" style="color:var(--purple-gastos)">-$0.00</div></div></div>
+<div class="row-item"><div><div class="row-title" style="color:#2dd4a0;font-size:17px;">NETO VALTRIX</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0;font-size:20px;">$1,652.40</div></div></div></div>
+  </div>
+
+  <!-- Cargas de la Semana -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-title">📦 Cargas de la semana</div>
+      <span style="font-weight:800;color:#2dd4a0;" id="loadsHeaderCount">1 carga</span>
+    </div>
+    <div class="section-desc" id="loadsDesc">1 carga registrada en curso ($2,550.00): NCC Logistics Load #166843 (McAllen, TX → London, KY · Pick Lun 23-Nov 14:00–15:00 / Del Mié 25-Nov 17:00–18:00). Trucker Tools activo y sello obligatorio; enviar POD en <24h.<div style="margin-top:8px;padding:10px 12px;border-radius:12px;background:rgba(235,87,87,0.14);border:1px solid rgba(235,87,87,0.45);color:#fca5a5;font-size:12.5px;"><b>⚠️ Recordatorio BOL Final de Entrega:</b> Faltan 1 (NCC Logistics) por subir firmados al entregar.</div></div>
+    <div id="loadsList"><div class="row-item"><div><div class="row-title">NCC Logistics — Load #166843 (McAllen, TX → London, KY)</div><div class="row-sub">ABC Technologies (5001 Tanya Ave, McAllen TX) → ABC Kentucky (145 Corporate Dr, London KY) · ~1,350 mi carg. + ~60 mi vacías desde Brownsville ($1.89/mi carg. · $1.81/mi tot · prov.) · Driver Daniel (25%)</div></div><div class="row-right"><div class="row-amount">$2,550.00</div><span class="tag miss">En curso · Falta POD</span></div></div></div>
+  </div>
+
+  <!-- Diésel de la Semana -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-title">⛽ Diésel (Greenlane y Mudflap)</div>
+      <span style="font-weight:800;color:#2dd4a0;" id="dieselHeaderAmt">$0.00</span>
+    </div>
+    <div class="section-desc" id="dieselDesc">Recibos PDF finales verificados y archivados en <b>Valtrix fuel</b> y <b>Valtrix</b>.</div>
+    <div id="dieselList"><div class="empty-state"><b>$0.00 en Diésel registrado en Semana 48 aún.</b><br/>Los recibos de Greenlane y Mudflap que entren a <b>valtrixtransport@gmail.com</b> se archivarán aquí automáticamente.</div></div>
+  </div>
+
+
+  <div class="section-card" id="noJsFallback">
+    <div class="section-header">
+      <div class="section-title">📂 Historial Detallado (Modo Vista Previa)</div>
+      <span class="tag ok">Sem 47 – 45</span>
+    </div>
+    <div class="section-desc">
+      Si tu visor de Drive bloquea botones interactivos, toca cada semana abajo para ver sus cargas y tanqueos (o abre el archivo con <b>Chrome</b>).
+    </div>
+    <details style="margin-bottom:10px;background:#181e1c;border:1px solid #232b29;border-radius:12px;padding:10px 12px;">
+    <summary style="cursor:pointer;font-weight:800;color:#2dd4a0;font-size:14px;">Semana 47 (17–23 nov · Cerrada) · Bruto $2,900.00 · Diésel -$916.70 · Neta $962.50</summary>
+    <div style="margin-top:8px;font-size:12px;color:#9ca8a4;">2 cargas ($2,900.00 · 2/2 POD OK · Driver Daniel 25%) + 4 diésel Mudflap ($916.70) · $0 gastos</div>
+    <div style="margin-top:10px;font-weight:700;font-size:12px;color:#fff;">📦 Cargas (2)</div><div class="row-item"><div><div class="row-title">Paragon Global Logistics — Load #1565</div><div class="row-sub">Milestone Cabinetry (Orlando, FL) → Irmo, SC · Pagado OTR VALT1-73 ($481.25 neto, 20-Nov) · ~461 mi tot · Driver Daniel (25%)</div></div><div class="row-right"><div class="row-amount">$500.00</div><span class="tag ok">POD OK · Pagado OTR</span></div></div><div class="row-item"><div><div class="row-title">TQL — PO #39242089 (Greenville, SC → Brownsville, TX)</div><div class="row-sub">GE Vernova Shipment #202679393 · 1,289 mi carg. + 91 mi vacías ($1.86/mi carg. · $1.74/mi tot) · POD firmado 23-Nov en Drive</div></div><div class="row-right"><div class="row-amount">$2,400.00</div><span class="tag ok">POD Firmado</span></div></div>
+    <div style="margin-top:10px;font-weight:700;font-size:12px;color:#fff;">⛽ Tanqueos Diésel (4 · 181.638 gal)</div><div class="row-item"><div><div class="row-title">18-Nov · Mudflap · TA Jacksonville South #248 (Jacksonville, FL)</div><div class="row-sub">46.261 gal ($5.34/gal · Ahorro $30.39) · +322 mi desde Medley FL · Processed Mudflap · Tx T643329065752</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$247.13</div><span class="tag ok">Processed</span></div></div><div class="row-item"><div><div class="row-title">19-Nov · Mudflap · 7-Eleven #42195 (Fountain Inn, SC)</div><div class="row-sub">45.080 gal ($4.94/gal · Ahorro $2.25 · Bajó -$2.25 vs prov) · +391 mi desde Jacksonville FL (8.7 mpg) · Odo 264,935 mi · Tx T653573448440</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$222.65</div><span class="tag ok">Processed</span></div></div><div class="row-item"><div><div class="row-title">21-Nov · Mudflap · Speedway #42351 (Irvington, AL)</div><div class="row-sub">43.086 gal ($4.92/gal · Ahorro $11.72) · +493 mi desde Fountain Inn SC (11.4 mpg) · Processed Mudflap · Tx T898109768611</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$211.85</div><span class="tag ok">Processed</span></div></div><div class="row-item"><div><div class="row-title">22-Nov · Mudflap · Conoco Travel Plaza #15 (Mont Belvieu, TX)</div><div class="row-sub">47.211 gal ($4.98/gal · Ahorro $0.94) · +422 mi desde Irvington AL (8.9 mpg) · Processed Mudflap · Tx T482363314803</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$235.07</div><span class="tag ok">Processed</span></div></div>
+  </details>
+<details style="margin-bottom:10px;background:#181e1c;border:1px solid #232b29;border-radius:12px;padding:10px 12px;">
+    <summary style="cursor:pointer;font-weight:800;color:#2dd4a0;font-size:14px;">Semana 46 (10–16 nov · Cerrada) · Bruto $8,750.00 · Diésel -$2,514.30 · Neta $2,984.28</summary>
+    <div style="margin-top:8px;font-size:12px;color:#9ca8a4;">4 cargas ($8,750 inc. $250 layover · 4/4 pagadas OTR) + 11 diésel ($2,514.30) + 3 gastos ($166.42)</div>
+    <div style="margin-top:10px;font-weight:700;font-size:12px;color:#fff;">📦 Cargas (4)</div><div class="row-item"><div><div class="row-title">Loadsmart, Inc. — Load #10288184</div><div class="row-sub">Bendix (Del Rio, TX) → Patton Warehousing (Dublin, VA) · Pagado OTR VALT1-70 ($2,718.00 neto) · BOL/POD entrega en Drive</div></div><div class="row-right"><div class="row-amount">$2,800.00</div><span class="tag ok">POD Firmado · Pagado OTR</span></div></div><div class="row-item"><div><div class="row-title">Ryan Transportation — Load #6578240</div><div class="row-sub">Atlantic Packaging (Greensboro, NC) → Classic Color (Broadview, IL) · Pagado OTR VALT1-71 ($1,361.50 neto) · POD en Drive</div></div><div class="row-right"><div class="row-amount">$1,400.00</div><span class="tag ok">POD Firmado · Pagado OTR</span></div></div><div class="row-item"><div><div class="row-title">GlobalTranz — Load #33456601</div><div class="row-sub">AFR (Woodridge, IL) → AFR (Hialeah, FL) · Pagado OTR VALT1-71 ($3,112.00 neto) · BOL/POD final de entrega en Drive</div></div><div class="row-right"><div class="row-amount">$3,200.00</div><span class="tag ok">POD Firmado · Pagado OTR</span></div></div><div class="row-item"><div><div class="row-title">Bergenstar, Inc. — PRO #55086 (Combinada IL→FL + Layover)</div><div class="row-sub">BSX Logix (Joliet, IL) → Livsmart (Winter Garden, FL) · $1,100 + $250 Layover · Pagado OTR VALT1-72 ($1,307.88 neto) · BOL/POD OK</div></div><div class="row-right"><div class="row-amount">$1,350.00</div><span class="tag ok">BOL/POD OK · Pagado OTR</span></div></div>
+    <div style="margin-top:10px;font-weight:700;font-size:12px;color:#fff;">⛽ Tanqueos Diésel (11 · 462.619 gal)</div><div class="row-item"><div><div class="row-title">09-Nov · Diésel Cash a Orlando · Del Rio #2 (Del Rio, TX)</div><div class="row-sub">19.296 gal ($5.139/gal) · Salida Bendix Del Rio · Recibo en Drive</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$99.16</div><span class="tag ok">Recibo en Drive</span></div></div><div class="row-item"><div><div class="row-title">10-Nov · Mudflap · Road Ranger #275 (Sonora, TX)</div><div class="row-sub">29.557 gal ($5.41/gal) · +90.0 mi desde Del Rio · Ahorro $35.18 · Tx T540151983059</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$159.87</div><span class="tag ok">PDF Final</span></div></div><div class="row-item"><div><div class="row-title">10-Nov · Mudflap · TA Express Mount Vernon #286 (Mount Vernon, TX)</div><div class="row-sub">48.635 gal ($5.47/gal) · +440.2 mi desde Sonora (9.1 mpg) · Tx T980208920229</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$265.94</div><span class="tag ok">PDF Final</span></div></div><div class="row-item"><div><div class="row-title">10-Nov · Mudflap · TA Denmark #245 (Denmark, TN)</div><div class="row-sub">38.847 gal ($5.42/gal) · +428.1 mi desde Mount Vernon (11.0 mpg) · Tx T218156659535</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$210.59</div><span class="tag ok">PDF Final</span></div></div><div class="row-item"><div><div class="row-title">11-Nov · Mudflap · TA Davy Crockett #201 (Greeneville, TN)</div><div class="row-sub">43.321 gal ($5.40/gal) · +391.2 mi desde Denmark (9.0 mpg) · Tx T754285891428</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$233.72</div><span class="tag ok">PDF Final</span></div></div><div class="row-item"><div><div class="row-title">12-Nov · Mudflap · TA Wytheville #143 (Wytheville, VA)</div><div class="row-sub">46.282 gal ($5.44/gal) · ~373 mi reales (vía Dublin+Greensboro) · Ahorro $44.34 · Tx T736654654669</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$251.82</div><span class="tag ok">PDF Final</span></div></div><div class="row-item"><div><div class="row-title">12-Nov · Mudflap · TA Dayton #11 (Eaton / Dayton, OH)</div><div class="row-sub">35.909 gal ($5.72/gal) · +320.7 mi desde Wytheville · Ahorro $17.23 · Tx T902062748599</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$205.36</div><span class="tag ok">PDF Final</span></div></div><div class="row-item"><div><div class="row-title">13-Nov · Mudflap · Food N Fuel Vetter Road (Elwood, IL)</div><div class="row-sub">49.928 gal ($5.62/gal) · ~329.3 mi reales desde Eaton (vía Broadview/Woodridge/Joliet) · Ahorro $23.76 · Tx T865763368094</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$280.75</div><span class="tag ok">PDF Final</span></div></div><div class="row-item"><div><div class="row-title">14-Nov · Mudflap · TA Antioch #117 (Antioch, TN)</div><div class="row-sub">55.052 gal ($5.39/gal) · +497.3 mi desde Elwood IL (9.0 mpg) · Ahorro $31.37 · Tx T8171977449</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$296.68</div><span class="tag ok">PDF Final</span></div></div><div class="row-item"><div><div class="row-title">15-Nov · Mudflap · TA Lake Park #249 (Lake Park, GA)</div><div class="row-sub">48.155 gal ($5.20/gal) · +471.4 mi desde Antioch TN (9.8 mpg) · Bajó -$7.70 vs prov · Tx T825017202138</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$250.36</div><span class="tag ok">PDF Final</span></div></div><div class="row-item"><div><div class="row-title">16-Nov · Mudflap · TA Express Medley #556 (Medley, FL)</div><div class="row-sub">47.637 gal ($5.46/gal) · +426.8 mi desde Lake Park GA (9.0 mpg) · Bajó -$19.06 vs prov · Tx T936882153557</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$260.05</div><span class="tag ok">PDF Final</span></div></div>
+  </details>
+<details style="margin-bottom:10px;background:#181e1c;border:1px solid #232b29;border-radius:12px;padding:10px 12px;">
+    <summary style="cursor:pointer;font-weight:800;color:#2dd4a0;font-size:14px;">Semana 45 (3–9 nov · Cerrada) · Bruto $4,550.00 · Diésel -$1,716.60 · Neta $797.66</summary>
+    <div style="margin-top:8px;font-size:12px;color:#9ca8a4;">Con los 7 PDFs finales de diésel ($1,716.60) y cambio de aceite ($388.64) confirmados</div>
+    <div style="margin-top:10px;font-weight:700;font-size:12px;color:#fff;">📦 Cargas (3)</div><div class="row-item"><div><div class="row-title">FWF — PRO 782287</div><div class="row-sub">Orlando, FL → Fayetteville, NC ($850 + $100 MacroPoint) · Entregada 04-Nov</div></div><div class="row-right"><div class="row-amount">$950.00</div><span class="tag ok">Cerrada</span></div></div><div class="row-item"><div><div class="row-title">L&M Transportation — #671936L</div><div class="row-sub">Ayden, NC → San Antonio, TX ($2,400 + $200 acc.) · POD Firmado 06-Nov en Drive</div></div><div class="row-right"><div class="row-amount">$2,600.00</div><span class="tag ok">Pagada OTR</span></div></div><div class="row-item"><div><div class="row-title">Core Logistics — #31420-22675</div><div class="row-sub">Dallas, GA → Pasadena/Houston, TX (Co-load) · POD Firmado 06-Nov en Drive</div></div><div class="row-right"><div class="row-amount">$1,000.00</div><span class="tag ok">Pagada OTR</span></div></div>
+    <div style="margin-top:10px;font-weight:700;font-size:12px;color:#fff;">⛽ Tanqueos Diésel (7 · 319.357 gal)</div><div class="row-item"><div><div class="row-title">02-Nov · Greenlane · Flying J #1096 (Cocoa, FL)</div><div class="row-sub">53.955 gal · Odómetro: 257,470 mi · Tx 807448831</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$316.74</div><span class="tag ok">PDF Final</span></div></div><div class="row-item"><div><div class="row-title">02-Nov · Mudflap · TA Savannah #177 (Richmond Hill, GA)</div><div class="row-sub">30.531 gal · Ruta FWF Sem 45 · Tx T17971810316</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$166.67</div><span class="tag ok">PDF Final</span></div></div><div class="row-item"><div><div class="row-title">04-Nov · Mudflap · Circle K #2723123 (Dunn, NC)</div><div class="row-sub">51.038 gal · PDF en Valtrix fuel/Sem 45 · Tx T445851582687</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$256.36</div><span class="tag ok">PDF Final</span></div></div><div class="row-item"><div><div class="row-title">04-Nov · Mudflap · TA Columbia North #507 (Columbia, SC)</div><div class="row-sub">36.435 gal · PDF en Valtrix fuel/Sem 45 · Tx T998036137207</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$199.63</div><span class="tag ok">PDF Final</span></div></div><div class="row-item"><div><div class="row-title">05-Nov · Mudflap · Petro Bucksville #319 (McCalla, AL)</div><div class="row-sub">48.843 gal · PDF en Valtrix fuel/Sem 45 · Tx T284458268551</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$268.59</div><span class="tag ok">PDF Final</span></div></div><div class="row-item"><div><div class="row-title">06-Nov · Mudflap · TA Lafayette #161 (Lafayette, LA)</div><div class="row-sub">46.055 gal ($5.13/gal) · PDF en Valtrix fuel/Sem 45 · Tx T945210791386</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$236.40</div><span class="tag ok">PDF Final</span></div></div><div class="row-item"><div><div class="row-title">06-Nov · Mudflap · Petro San Antonio #305 (San Antonio, TX)</div><div class="row-sub">52.500 gal ($5.19/gal) · PDF en Valtrix fuel/Sem 45 · Tx T124226386795</div></div><div class="row-right"><div class="row-amount" style="color:#2dd4a0">-$272.21</div><span class="tag ok">PDF Final</span></div></div>
+  </details>
+  </div>
+
+  <button class="btn-whatsapp" onclick="copiarWhatsApp()">
+    📲 Copiar Resumen para Karen (WhatsApp)
+  </button>
+
+  <div class="footer-note" id="copyMsg">
+    Valtrix Transport LLC · Separado 100% de BECS Logistics LLC
+  </div>
+
+  <script>
+    function safeGet(k) { try { return window.localStorage ? window.localStorage.getItem(k) : null; } catch (e) { return null; } }
+    function safeSet(k, v) { try { if (window.localStorage) window.safeSet(k, v); } catch (e) {} }
+
+    const DEFAULT_BASE = 259862;
+    let savedBase = parseInt(safeGet("valtrix_oil_base") || "0", 10);
+    if (isNaN(savedBase) || savedBase < DEFAULT_BASE) {
+      savedBase = DEFAULT_BASE;
+      safeSet("valtrix_oil_base", String(DEFAULT_BASE));
+    }
+    let oilBase = savedBase;
+    let oilTarget = oilBase + 15000;
+
+    const DEFAULT_ODO = 264935;
+    let savedOdo = parseInt(safeGet("valtrix_current_odo") || "0", 10);
+    if (isNaN(savedOdo) || savedOdo < DEFAULT_ODO) {
+      savedOdo = DEFAULT_ODO;
+      safeSet("valtrix_current_odo", String(DEFAULT_ODO));
+    }
+    let currentOdo = savedOdo;
+
+    const WEEKS = {
+      48: {
+        num: 48,
+        shortSub: "24–30 nov · En curso",
+        longDates: "Martes 24 nov → Lunes 30 nov 2026 · En curso (Driver Daniel 25% · 0/1 POD · 0 Diésel)",
+        netLabel: "NETA EN CURSO SEMANA 48 (ANTES DE DIÉSEL)",
+        caption: "1 carga ($2,550.00 · Falta POD · Driver Daniel 25%) + $0 diésel · $0 gastos",
+        driverName: "Daniel",
+        driverPct: 25,
+        orlandoExtra: "Conductor activo (25% · Vacaciones Orlando) · Truck 001",
+        gross: 2550.00,
+        orlando: 637.50,
+        henry: 178.50,
+        factoring: 81.60,
+        diesel: 0.00,
+        gallons: 0.000,
+        other: 0.00,
+        net: 1652.40,
+        rpmText: "$1.89/mi cargada (~1,350 mi prov.) · $1.81/mi total con vacías (~1,410 mi prov.) · $1.17/mi libre antes de diésel",
+        loadsNote: "1 carga registrada en curso ($2,550.00): NCC Logistics Load #166843 (McAllen, TX → London, KY · Pick Lun 23-Nov 14:00–15:00 / Del Mié 25-Nov 17:00–18:00). Trucker Tools activo y sello obligatorio; enviar POD en <24h.",
+        loads: [
+          {
+            title: "NCC Logistics — Load #166843 (McAllen, TX → London, KY)",
+            sub: "ABC Technologies (5001 Tanya Ave, McAllen TX) → ABC Kentucky (145 Corporate Dr, London KY) · ~1,350 mi carg. + ~60 mi vacías desde Brownsville ($1.89/mi carg. · $1.81/mi tot · prov.) · Driver Daniel (25%)",
+            amount: 2550.00,
+            tag: "En curso · Falta POD",
+            podMissing: true
+          }
+        ],
+        expenses: [],
+        fuels: []
+      },
+      47: {
+        num: 47,
+        shortSub: "17–23 nov · Cerrada",
+        longDates: "Martes 17 nov → Lunes 23 nov 2026 · Cerrada (Driver Daniel 25% · 2/2 POD · 4/4 Diésel Firmes)",
+        netLabel: "NETA CERRADA SEMANA 47 (4/4 DIÉSEL FIRMES)",
+        caption: "2 cargas ($2,900.00 · 2/2 POD OK · Driver Daniel 25%) + 4 diésel Mudflap ($916.70) · $0 gastos",
+        driverName: "Daniel",
+        driverPct: 25,
+        orlandoExtra: "Nuevo Conductor (25% · Vacaciones Orlando) · Truck 001",
+        gross: 2900.00,
+        orlando: 725.00,
+        henry: 203.00,
+        factoring: 92.80,
+        diesel: 916.70,
+        gallons: 181.638,
+        other: 0.00,
+        net: 962.50,
+        rpmText: "$1.68/mi cargada (1,725 mi) · $1.58/mi total con vacías (1,841 mi) · $0.52/mi libre Valtrix · $0.50/mi costo diésel",
+        loadsNote: "2 cargas cerradas ($2,900.00): #1 Paragon #1565 ($500 PAGADA OTR VALT1-73) y #2 TQL PO #39242089 ($2,400 POD firmado 23-Nov en Drive, listo para OTR).",
+        loads: [
+          {
+            title: "Paragon Global Logistics — Load #1565",
+            sub: "Milestone Cabinetry (Orlando, FL) → Irmo, SC · Pagado OTR VALT1-73 ($481.25 neto, 20-Nov) · ~461 mi tot · Driver Daniel (25%)",
+            amount: 500.00,
+            tag: "POD OK · Pagado OTR",
+            podMissing: false
+          },
+          {
+            title: "TQL — PO #39242089 (Greenville, SC → Brownsville, TX)",
+            sub: "GE Vernova Shipment #202679393 · 1,289 mi carg. + 91 mi vacías ($1.86/mi carg. · $1.74/mi tot) · POD firmado 23-Nov en Drive",
+            amount: 2400.00,
+            tag: "POD Firmado",
+            podMissing: false
+          }
+        ],
+        expenses: [],
+        fuels: [
+          {
+            title: "18-Nov · Mudflap · TA Jacksonville South #248 (Jacksonville, FL)",
+            sub: "46.261 gal ($5.34/gal · Ahorro $30.39) · +322 mi desde Medley FL · Processed Mudflap · Tx T643329065752",
+            amount: 247.13,
+            tag: "Processed",
+            ok: true
+          },
+          {
+            title: "19-Nov · Mudflap · 7-Eleven #42195 (Fountain Inn, SC)",
+            sub: "45.080 gal ($4.94/gal · Ahorro $2.25 · Bajó -$2.25 vs prov) · +391 mi desde Jacksonville FL (8.7 mpg) · Odo 264,935 mi · Tx T653573448440",
+            amount: 222.65,
+            tag: "Processed",
+            ok: true
+          },
+          {
+            title: "21-Nov · Mudflap · Speedway #42351 (Irvington, AL)",
+            sub: "43.086 gal ($4.92/gal · Ahorro $11.72) · +493 mi desde Fountain Inn SC (11.4 mpg) · Processed Mudflap · Tx T898109768611",
+            amount: 211.85,
+            tag: "Processed",
+            ok: true
+          },
+          {
+            title: "22-Nov · Mudflap · Conoco Travel Plaza #15 (Mont Belvieu, TX)",
+            sub: "47.211 gal ($4.98/gal · Ahorro $0.94) · +422 mi desde Irvington AL (8.9 mpg) · Processed Mudflap · Tx T482363314803",
+            amount: 235.07,
+            tag: "Processed",
+            ok: true
+          }
+        ]
+      },
+      46: {
+        num: 46,
+        shortSub: "10–16 nov · Cerrada",
+        longDates: "Martes 10 nov → Lunes 16 nov 2026 · 11/11 Diésel Firmes · 4/4 Pagadas OTR",
+        netLabel: "NETA SEMANA 46 (CON LAYOVER $250)",
+        caption: "4 cargas ($8,750 inc. $250 layover · 4/4 pagadas OTR) + 11 diésel ($2,514.30) + 3 gastos ($166.42)",
+        gross: 8750.00,
+        orlando: 2210.00,
+        henry: 595.00,
+        factoring: 280.00,
+        diesel: 2514.30,
+        gallons: 462.619,
+        other: 166.42,
+        net: 2984.28,
+        rpmText: "$2.30/mi cargada (3,810 mi) · $2.14/mi total con vacías (4,098 mi) · $0.73/mi libre Valtrix · $0.61/mi costo diésel",
+        loadsNote: "4 cargas ($8,750): #1 Loadsmart, #2 Ryan, #3 GlobalTranz y #4 Bergenstar ($1,100 + $250 Layover) PAGADAS EN OTR ($8,494.38 neto).",
+        loads: [
+          {
+            title: "Loadsmart, Inc. — Load #10288184",
+            sub: "Bendix (Del Rio, TX) → Patton Warehousing (Dublin, VA) · Pagado OTR VALT1-70 ($2,718.00 neto) · BOL/POD entrega en Drive",
+            amount: 2800.00,
+            tag: "POD Firmado · Pagado OTR",
+            podMissing: false
+          },
+          {
+            title: "Ryan Transportation — Load #6578240",
+            sub: "Atlantic Packaging (Greensboro, NC) → Classic Color (Broadview, IL) · Pagado OTR VALT1-71 ($1,361.50 neto) · POD en Drive",
+            amount: 1400.00,
+            tag: "POD Firmado · Pagado OTR",
+            podMissing: false
+          },
+          {
+            title: "GlobalTranz — Load #33456601",
+            sub: "AFR (Woodridge, IL) → AFR (Hialeah, FL) · Pagado OTR VALT1-71 ($3,112.00 neto) · BOL/POD final de entrega en Drive",
+            amount: 3200.00,
+            tag: "POD Firmado · Pagado OTR",
+            podMissing: false
+          },
+          {
+            title: "Bergenstar, Inc. — PRO #55086 (Combinada IL→FL + Layover)",
+            sub: "BSX Logix (Joliet, IL) → Livsmart (Winter Garden, FL) · $1,100 + $250 Layover · Pagado OTR VALT1-72 ($1,307.88 neto) · BOL/POD OK",
+            amount: 1350.00,
+            tag: "BOL/POD OK · Pagado OTR",
+            podMissing: false
+          }
+        ],
+        expenses: [
+          {
+            title: "13-Nov · ELD APP — Suscripción Mensual (Receipt #2610-7156)",
+            sub: "Cobertura Nov 13 – Dic 13, 2026 · Pagado tarjeta ...9803 · PDF archivado en Drive",
+            amount: 120.00,
+            tag: "PDF en Drive",
+            miss: false
+          },
+          {
+            title: "14-Nov · DriveKS — Kansas Turnpike Toll (Acct #8112528)",
+            sub: "Pago de peaje procesado 11/14/2026 · Confirmación archivada en Drive",
+            amount: 35.92,
+            tag: "Recibo en Drive",
+            miss: false
+          },
+          {
+            title: "16-Nov · PlatePay — Oklahoma Turnpike Authority (ID #11635360)",
+            sub: "Pago de peaje aprobado 11/16/2026 · Tarjeta ...4500 · Confirmación archivada en Drive",
+            amount: 10.50,
+            tag: "Recibo en Drive",
+            miss: false
+          }
+        ],
+        fuels: [
+          { title: "09-Nov · Diésel Cash a Orlando · Del Rio #2 (Del Rio, TX)", sub: "19.296 gal ($5.139/gal) · Salida Bendix Del Rio · Recibo en Drive", amount: 99.16, tag: "Recibo en Drive", ok: true },
+          { title: "10-Nov · Mudflap · Road Ranger #275 (Sonora, TX)", sub: "29.557 gal ($5.41/gal) · +90.0 mi desde Del Rio · Ahorro $35.18 · Tx T540151983059", amount: 159.87, tag: "PDF Final", ok: true },
+          { title: "10-Nov · Mudflap · TA Express Mount Vernon #286 (Mount Vernon, TX)", sub: "48.635 gal ($5.47/gal) · +440.2 mi desde Sonora (9.1 mpg) · Tx T980208920229", amount: 265.94, tag: "PDF Final", ok: true },
+          { title: "10-Nov · Mudflap · TA Denmark #245 (Denmark, TN)", sub: "38.847 gal ($5.42/gal) · +428.1 mi desde Mount Vernon (11.0 mpg) · Tx T218156659535", amount: 210.59, tag: "PDF Final", ok: true },
+          { title: "11-Nov · Mudflap · TA Davy Crockett #201 (Greeneville, TN)", sub: "43.321 gal ($5.40/gal) · +391.2 mi desde Denmark (9.0 mpg) · Tx T754285891428", amount: 233.72, tag: "PDF Final", ok: true },
+          { title: "12-Nov · Mudflap · TA Wytheville #143 (Wytheville, VA)", sub: "46.282 gal ($5.44/gal) · ~373 mi reales (vía Dublin+Greensboro) · Ahorro $44.34 · Tx T736654654669", amount: 251.82, tag: "PDF Final", ok: true },
+          { title: "12-Nov · Mudflap · TA Dayton #11 (Eaton / Dayton, OH)", sub: "35.909 gal ($5.72/gal) · +320.7 mi desde Wytheville · Ahorro $17.23 · Tx T902062748599", amount: 205.36, tag: "PDF Final", ok: true },
+          { title: "13-Nov · Mudflap · Food N Fuel Vetter Road (Elwood, IL)", sub: "49.928 gal ($5.62/gal) · ~329.3 mi reales desde Eaton (vía Broadview/Woodridge/Joliet) · Ahorro $23.76 · Tx T865763368094", amount: 280.75, tag: "PDF Final", ok: true },
+          { title: "14-Nov · Mudflap · TA Antioch #117 (Antioch, TN)", sub: "55.052 gal ($5.39/gal) · +497.3 mi desde Elwood IL (9.0 mpg) · Ahorro $31.37 · Tx T8171977449", amount: 296.68, tag: "PDF Final", ok: true },
+          { title: "15-Nov · Mudflap · TA Lake Park #249 (Lake Park, GA)", sub: "48.155 gal ($5.20/gal) · +471.4 mi desde Antioch TN (9.8 mpg) · Bajó -$7.70 vs prov · Tx T825017202138", amount: 250.36, tag: "PDF Final", ok: true },
+          { title: "16-Nov · Mudflap · TA Express Medley #556 (Medley, FL)", sub: "47.637 gal ($5.46/gal) · +426.8 mi desde Lake Park GA (9.0 mpg) · Bajó -$19.06 vs prov · Tx T936882153557", amount: 260.05, tag: "PDF Final", ok: true }
+        ]
+      },
+      45: {
+        num: 45,
+        shortSub: "3–9 nov · Cerrada",
+        longDates: "Martes 3 nov → Lunes 9 nov 2026 · Semana cerrada (OTR $3,496 pagado)",
+        netLabel: "NETA CERRADA (7 PDFS + ACEITE)",
+        caption: "Con los 7 PDFs finales de diésel ($1,716.60) y cambio de aceite ($388.64) confirmados",
+        gross: 4550.00,
+        orlando: 1183.00,
+        henry: 318.50,
+        factoring: 145.60,
+        diesel: 1716.60,
+        gallons: 319.357,
+        other: 388.64,
+        net: 797.66,
+        rpmText: "$1.81/mi cargada (~2,512 mi) · $1.68/mi total con vacías (~2,705 mi)",
+        loadsNote: "3 cargas cerradas suman el bruto de $4,550.00. L&M ($2,600) y Core ($1,000) ya liquidados en OTR Schedule #VALT1-69 (09-Nov).",
+        loads: [
+          { title: "FWF — PRO 782287", sub: "Orlando, FL → Fayetteville, NC ($850 + $100 MacroPoint) · Entregada 04-Nov", amount: 950.00, tag: "Cerrada" },
+          { title: "L&M Transportation — #671936L", sub: "Ayden, NC → San Antonio, TX ($2,400 + $200 acc.) · POD Firmado 06-Nov en Drive", amount: 2600.00, tag: "Pagada OTR" },
+          { title: "Core Logistics — #31420-22675", sub: "Dallas, GA → Pasadena/Houston, TX (Co-load) · POD Firmado 06-Nov en Drive", amount: 1000.00, tag: "Pagada OTR" }
+        ],
+        expenses: [
+          {
+            title: "06-Nov · FleetPride #755 (San Antonio, TX) — Inv #80083464",
+            sub: "Insumos Cambio Aceite: 5 Gal 15W40 ($78.37) + Separador BF46160 ($150.99) + Filtro Aceite B7177 ($19.59) + Filtro Comb. BF63000 ($35.63) + Tax ($16.14)",
+            amount: 325.08,
+            tag: "Recibo en Drive",
+            miss: false
+          },
+          {
+            title: "07-Nov · TA Truck Service #305 (Petro San Antonio, TX) — WO #2611005238",
+            sub: "Mano de Obra Cambio de Aceite ($59.50) + Shop Supplies ($3.75) + Tax ($0.31) · Odómetro: 259,862 mi",
+            amount: 63.56,
+            tag: "Recibo en Drive",
+            miss: false
+          }
+        ],
+        fuels: [
+          { title: "02-Nov · Greenlane · Flying J #1096 (Cocoa, FL)", sub: "53.955 gal · Odómetro: 257,470 mi · Tx 807448831", amount: 316.74, tag: "PDF Final", ok: true },
+          { title: "02-Nov · Mudflap · TA Savannah #177 (Richmond Hill, GA)", sub: "30.531 gal · Ruta FWF Sem 45 · Tx T17971810316", amount: 166.67, tag: "PDF Final", ok: true },
+          { title: "04-Nov · Mudflap · Circle K #2723123 (Dunn, NC)", sub: "51.038 gal · PDF en Valtrix fuel/Sem 45 · Tx T445851582687", amount: 256.36, tag: "PDF Final", ok: true },
+          { title: "04-Nov · Mudflap · TA Columbia North #507 (Columbia, SC)", sub: "36.435 gal · PDF en Valtrix fuel/Sem 45 · Tx T998036137207", amount: 199.63, tag: "PDF Final", ok: true },
+          { title: "05-Nov · Mudflap · Petro Bucksville #319 (McCalla, AL)", sub: "48.843 gal · PDF en Valtrix fuel/Sem 45 · Tx T284458268551", amount: 268.59, tag: "PDF Final", ok: true },
+          { title: "06-Nov · Mudflap · TA Lafayette #161 (Lafayette, LA)", sub: "46.055 gal ($5.13/gal) · PDF en Valtrix fuel/Sem 45 · Tx T945210791386", amount: 236.40, tag: "PDF Final", ok: true },
+          { title: "06-Nov · Mudflap · Petro San Antonio #305 (San Antonio, TX)", sub: "52.500 gal ($5.19/gal) · PDF en Valtrix fuel/Sem 45 · Tx T124226386795", amount: 272.21, tag: "PDF Final", ok: true }
+        ]
+      },
+      44: {
+        num: 44,
+        shortSub: "27 oct–2 nov · Cerrada",
+        longDates: "Martes 27 oct → Lunes 2 nov 2026 · Semana cerrada",
+        netLabel: "NETA CERRADA",
+        caption: "Cierre oficial Semana 44 ($6,000.00 bruto)",
+        gross: 6000.00,
+        orlando: 1482.00,
+        orlandoExtra: "($1,452.00 a pagar tras -$30 taladro)",
+        henry: 399.00,
+        factoring: 193.60,
+        diesel: 1794.99,
+        gallons: 304.233,
+        other: 5.00,
+        net: 2125.41,
+        loadsNote: "Cargas cerradas de Semana 44 ($5,700 flete + $300 detention).",
+        loads: [
+          { title: "Total Cargas Semana 44", sub: "Flete base $5,700.00 + Detention $300.00 (Cierre en Florida 01-Nov)", amount: 6000.00, tag: "Cerrada" }
+        ],
+        expenses: [
+          { title: "Otros gastos operativos Sem 44", sub: "Registrado en hoja de cierre · Carpeta Semana 44 sin PDF aún", amount: 5.00, tag: "Falta recibo", miss: true },
+          { title: "Deducción Taladro (Drill) a Orlando", sub: "Descontado del pago de Orlando ($1,482 -> $1,452)", amount: 30.00, tag: "Falta recibo", miss: true }
+        ],
+        fuels: [
+          { title: "Total Diésel Semana 44 (27 Oct – 01 Nov)", sub: "304.233 gal (Excluye $166.67 del 02-Nov que pasó a Sem 45)", amount: 1794.99, tag: "Cerrado", ok: true }
+        ]
+      },
+      43: {
+        num: 43,
+        shortSub: "20–26 oct · Cerrada",
+        longDates: "Martes 20 oct → Lunes 26 oct 2026 · Semana cerrada",
+        netLabel: "NETA CERRADA",
+        caption: "Cierre oficial Semana 43 ($7,550.00 bruto)",
+        gross: 7550.00,
+        orlando: 1963.00,
+        henry: 528.50,
+        factoring: 241.60,
+        diesel: 2136.79,
+        gallons: 353.035,
+        other: 0.00,
+        net: 2680.11,
+        loadsNote: "Cierre oficial Semana 43 (Odómetro al 23-Oct: 253,091 mi).",
+        loads: [
+          { title: "Total Cargas Semana 43", sub: "20 Oct – 26 Oct 2026", amount: 7550.00, tag: "Cerrada" }
+        ],
+        expenses: [],
+        fuels: [
+          { title: "Total Diésel Semana 43", sub: "353.035 gal confirmados en Drive", amount: 2136.79, tag: "Cerrado", ok: true }
+        ]
+      },
+      42: {
+        num: 42,
+        shortSub: "13–19 oct · Cerrada",
+        longDates: "Martes 13 oct → Lunes 19 oct 2026 · Semana cerrada",
+        netLabel: "NETA CERRADA",
+        caption: "Cierre oficial Semana 42 ($4,489.62 bruto)",
+        gross: 4489.62,
+        orlando: 962.00,
+        henry: 259.00,
+        factoring: 134.56,
+        diesel: 1327.19,
+        gallons: 219.348,
+        other: 284.62,
+        net: 1522.25,
+        loadsNote: "Flete $3,700.00 + TONU $505.00 + Lumper reembolsado $284.62.",
+        loads: [
+          { title: "Total Cargas Semana 42", sub: "Incluye TONU ($505) y Lumper pass-through ($284.62)", amount: 4489.62, tag: "Cerrada" }
+        ],
+        expenses: [
+          { title: "Lumper Pass-through (Reembolsado)", sub: "Entra y sale sin afectar neto ($0 costo para Valtrix)", amount: 284.62, tag: "Archivado", miss: false }
+        ],
+        fuels: [
+          { title: "Total Diésel Semana 42", sub: "219.348 gal confirmados en Drive", amount: 1327.19, tag: "Cerrado", ok: true }
+        ]
+      },
+      41: {
+        num: 41,
+        shortSub: "6–12 oct · Cerrada",
+        longDates: "Martes 6 oct → Lunes 12 oct 2026 · Semana cerrada",
+        netLabel: "NETA CERRADA",
+        caption: "Cierre oficial Semana 41 ($9,040.00 bruto)",
+        gross: 9040.00,
+        orlando: 2314.00,
+        henry: 357.00,
+        factoring: 289.28,
+        diesel: 2302.22,
+        gallons: 397.739,
+        other: 0.00,
+        net: 3777.50,
+        loadsNote: "Cierre oficial Semana 41.",
+        loads: [
+          { title: "Total Cargas Semana 41", sub: "06 Oct – 12 Oct 2026", amount: 9040.00, tag: "Cerrada" }
+        ],
+        expenses: [],
+        fuels: [
+          { title: "Total Diésel Semana 41", sub: "397.739 gal confirmados en Drive", amount: 2302.22, tag: "Cerrado", ok: true }
+        ]
+      },
+      40: {
+        num: 40,
+        shortSub: "29 sep–5 oct · Cerrada",
+        longDates: "Martes 29 sep → Lunes 5 oct 2026 · Semana cerrada",
+        netLabel: "NETA CERRADA",
+        caption: "Cierre oficial Semana 40 ($8,700.00 bruto)",
+        gross: 8700.00,
+        orlando: 2262.00,
+        henry: 609.00,
+        factoring: 278.40,
+        diesel: 1932.39,
+        gallons: 332.831,
+        other: 0.00,
+        net: 3618.21,
+        loadsNote: "Cierre oficial Semana 40 (Cambio de aceite anterior en Sapp Bros Cheyenne, WY a las 244,960 mi).",
+        loads: [
+          { title: "Total Cargas Semana 40", sub: "29 Sep – 05 Oct 2026", amount: 8700.00, tag: "Cerrada" }
+        ],
+        expenses: [
+          { title: "04-Oct · Sapp Bros (Cheyenne, WY) — Cambio de Aceite", sub: "Odómetro base registrado: 244,960 mi (Ciclo cumplido a las 259,862 mi el 07-Nov)", amount: 0.00, tag: "En Bitácora", miss: false }
+        ],
+        fuels: [
+          { title: "Total Diésel Semana 40", sub: "332.831 gal confirmados en Drive", amount: 1932.39, tag: "Cerrado", ok: true }
+        ]
+      }
+    };
+
+    let activeWeek = 48;
+
+    function fmt(n) {
+      return "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function renderOilUI() {
+      oilTarget = oilBase + 15000;
+      const rem = oilTarget - currentOdo;
+      const pct = Math.min(100, Math.max(1, ((currentOdo - oilBase) / 15000) * 100));
+      document.getElementById("odoBaseVal").textContent = oilBase.toLocaleString("en-US") + " mi";
+      document.getElementById("odoTargetVal").textContent = oilTarget.toLocaleString("en-US") + " mi";
+      document.getElementById("odoEstVal").textContent = currentOdo.toLocaleString("en-US") + " mi";
+      document.getElementById("odoRemVal").textContent = (rem >= 0 ? rem.toLocaleString("en-US") : "VENCIDO +" + Math.abs(rem).toLocaleString("en-US")) + " mi";
+      const pill = document.getElementById("oilPill");
+      pill.textContent = rem <= 1000 ? `Faltan ${rem.toLocaleString("en-US")} mi` : `✅ Faltan ${rem.toLocaleString("en-US")} mi`;
+      pill.className = "oil-pill" + (rem <= 1000 ? " urgent" : "");
+      document.getElementById("oilFill").style.width = pct.toFixed(1) + "%";
+    }
+
+    function renderMatrix() {
+      const order = [48, 47, 46, 45, 44, 43, 42, 41, 40];
+      let totGross = 0, totOrl = 0, totHen = 0, totFac = 0, totDie = 0, totGas = 0, totNet = 0;
+
+      const rowsHtml = order.map(w => {
+        const d = WEEKS[w];
+        totGross += d.gross;
+        totOrl += d.orlando;
+        totHen += d.henry;
+        totFac += d.factoring;
+        totDie += d.diesel;
+        totGas += d.other;
+        totNet += d.net;
+
+        return `
+          <tr class="${w === activeWeek ? 'active-row' : ''}" onclick="selectWeek(${w})" style="cursor:pointer;">
+            <td>Sem ${w} ${w === 48 ? '🟢' : ''}</td>
+            <td>${fmt(d.gross)}</td>
+            <td style="color:var(--teal-conductor)">-${fmt(d.orlando)}</td>
+            <td style="color:var(--amber-dispatcher)">-${fmt(d.henry)}</td>
+            <td style="color:var(--coral-factoring)">-${fmt(d.factoring)}</td>
+            <td style="color:var(--gray-diesel)">-${fmt(d.diesel)}</td>
+            <td style="color:var(--purple-gastos)">-${fmt(d.other)}</td>
+            <td style="color:#2dd4a0;font-weight:800;">${fmt(d.net)}</td>
+          </tr>
+        `;
+      }).join("");
+
+      const totalRow = `
+        <tr class="total-row">
+          <td>TOTAL (9 Sem)</td>
+          <td>${fmt(totGross)}</td>
+          <td>-${fmt(totOrl)}</td>
+          <td>-${fmt(totHen)}</td>
+          <td>-${fmt(totFac)}</td>
+          <td>-${fmt(totDie)}</td>
+          <td>-${fmt(totGas)}</td>
+          <td style="color:#2dd4a0;">${fmt(totNet)}</td>
+        </tr>
+      `;
+
+      document.getElementById("matrixBody").innerHTML = rowsHtml + totalRow;
+    }
+
+    function render() {
+      renderOilUI();
+      renderMatrix();
+
+      const grid = document.getElementById("weekGrid");
+      grid.innerHTML = [48, 47, 46, 45, 44, 43, 42, 41, 40].map(w => {
+        const item = WEEKS[w];
+        return `
+          <button class="week-btn ${w === activeWeek ? 'active' : ''}" onclick="selectWeek(${w})">
+            <span class="w-title">Semana ${w}</span>
+            <span class="w-sub">${item.shortSub}</span>
+          </button>
+        `;
+      }).join("");
+
+      const d = WEEKS[activeWeek];
+      document.getElementById("heroKicker").textContent = `SEMANA ${d.num} — PANEL PARA BRYAN Y KAREN`;
+      document.getElementById("heroDates").textContent = d.longDates;
+      document.getElementById("heroNetLabel").textContent = d.netLabel;
+      document.getElementById("heroNetCaption").textContent = d.caption || "";
+
+      const rpmBanner = document.getElementById("rpmBanner");
+      if (d.rpmText) {
+        rpmBanner.style.display = "flex";
+        document.getElementById("rpmBannerText").innerHTML = `🛣️ <b>A cómo nos sale la milla:</b> ${d.rpmText}`;
+      } else {
+        rpmBanner.style.display = "none";
+      }
+
+      const parts = d.net.toFixed(2).split(".");
+      document.getElementById("heroNetVal").innerHTML = `$${Number(parts[0]).toLocaleString("en-US")}<span class="cents">.${parts[1]}</span>`;
+
+      document.getElementById("kpiGross").textContent = fmt(d.gross);
+      document.getElementById("kpiDiesel").textContent = fmt(d.diesel);
+      document.getElementById("kpiGal").textContent = `${d.gallons.toFixed(3)} gal`;
+      document.getElementById("kpiExpenses").textContent = fmt(d.other);
+
+      const pOrl = (d.orlando / d.gross) * 100;
+      const pHen = (d.henry / d.gross) * 100;
+      const pFac = (d.factoring / d.gross) * 100;
+      const pDie = (d.diesel / d.gross) * 100;
+      const pGas = (d.other / d.gross) * 100;
+      const pNet = Math.max(0, (d.net / d.gross) * 100);
+
+      document.getElementById("splitBar").innerHTML = `
+        <div class="split-seg" style="width:${pOrl}%;background:var(--teal-conductor)"></div>
+        <div class="split-seg" style="width:${pHen}%;background:var(--amber-dispatcher)"></div>
+        <div class="split-seg" style="width:${pFac}%;background:var(--coral-factoring)"></div>
+        <div class="split-seg" style="width:${pDie}%;background:var(--gray-diesel)"></div>
+        ${pGas > 0 ? `<div class="split-seg" style="width:${pGas}%;background:var(--purple-gastos)"></div>` : ""}
+        <div class="split-seg" style="width:${pNet}%;background:#ffffff"></div>
+      `;
+
+      const drvName = d.driverName || "Orlando Pinto";
+      const drvPct = d.driverPct || 26;
+
+      document.getElementById("splitLegend").innerHTML = `
+        <div class="legend-item"><span class="dot" style="background:var(--teal-conductor)"></span>Conductor ${drvPct}%</div>
+        <div class="legend-item"><span class="dot" style="background:var(--amber-dispatcher)"></span>Dispatcher 7%</div>
+        <div class="legend-item"><span class="dot" style="background:var(--coral-factoring)"></span>Factoring 3.2%</div>
+        <div class="legend-item"><span class="dot" style="background:var(--gray-diesel)"></span>Diésel</div>
+        ${d.other > 0 ? `<div class="legend-item"><span class="dot" style="background:var(--purple-gastos)"></span>Gastos (${fmt(d.other)})</div>` : ""}
+        <div class="legend-item"><span class="dot" style="background:#ffffff"></span>Neta</div>
+      `;
+
+      document.getElementById("gastosHeaderAmt").textContent = fmt(d.other);
+      const expEl = document.getElementById("expensesList");
+      if (!d.expenses || d.expenses.length === 0) {
+        expEl.innerHTML = `
+          <div class="empty-state">
+            <b>$0.00 en Gastos Operativos en Semana ${d.num}.</b><br/>
+            Cuando tengas un recibo de cambio de aceite, peaje, escala, reparación o deducción, mándalo a <b>valtrixtransport@gmail.com</b> o súbelo al chat.
+          </div>
+        `;
+      } else {
+        expEl.innerHTML = d.expenses.map(e => `
+          <div class="row-item">
+            <div>
+              <div class="row-title">${e.title}</div>
+              <div class="row-sub">${e.sub}</div>
+            </div>
+            <div class="row-right">
+              <div class="row-amount" style="color:${e.miss ? '#f87171' : '#a78bfa'}">-${fmt(e.amount)}</div>
+              <span class="tag ${e.miss ? 'miss' : 'ok'}">${e.tag}</span>
+            </div>
+          </div>
+        `).join("");
+      }
+
+      document.getElementById("breakdownList").innerHTML = `
+        <div class="row-item">
+          <div><div class="row-title">Ingreso Bruto</div><div class="row-sub">${d.rpmText ? "A cómo sale la milla: " + d.rpmText : "Total RateCons de la semana"}</div></div>
+          <div class="row-right"><div class="row-amount">${fmt(d.gross)}</div></div>
+        </div>
+        <div class="row-item">
+          <div><div class="row-title">${drvName} (${drvPct}%)</div><div class="row-sub">${d.orlandoExtra || "Conductor · Truck 001"}</div></div>
+          <div class="row-right"><div class="row-amount" style="color:var(--teal-conductor)">-${fmt(d.orlando)}</div></div>
+        </div>
+        <div class="row-item">
+          <div><div class="row-title">Henry Abbets (7%)</div><div class="row-sub">Glitch Free Dispatch</div></div>
+          <div class="row-right"><div class="row-amount" style="color:var(--amber-dispatcher)">-${fmt(d.henry)}</div></div>
+        </div>
+        <div class="row-item">
+          <div><div class="row-title">Factoring (3.2%)</div><div class="row-sub">Sobre el bruto total</div></div>
+          <div class="row-right"><div class="row-amount" style="color:var(--coral-factoring)">-${fmt(d.factoring)}</div></div>
+        </div>
+        <div class="row-item">
+          <div><div class="row-title">Diésel (${d.gallons.toFixed(3)} gal)</div><div class="row-sub">Greenlane + Mudflap</div></div>
+          <div class="row-right"><div class="row-amount" style="color:var(--gray-diesel)">-${fmt(d.diesel)}</div></div>
+        </div>
+        <div class="row-item">
+          <div><div class="row-title">Gastos por Semana (Agente 4)</div><div class="row-sub">${d.num === 45 ? "FleetPride ($325.08) + Mano de Obra TA Petro ($63.56)" : "Gastos operativos de la semana"}</div></div>
+          <div class="row-right"><div class="row-amount" style="color:var(--purple-gastos)">-${fmt(d.other)}</div></div>
+        </div>
+        <div class="row-item">
+          <div><div class="row-title" style="color:#2dd4a0;font-size:17px;">NETO VALTRIX</div></div>
+          <div class="row-right"><div class="row-amount" style="color:#2dd4a0;font-size:20px;">${fmt(d.net)}</div></div>
+        </div>
+      `;
+
+      document.getElementById("loadsHeaderCount").textContent = `${d.loads.length} ${d.loads.length === 1 ? 'carga' : 'cargas'}`;
+      const missingPods = d.loads.filter(l => l.podMissing);
+      const podAlertHtml = missingPods.length > 0
+        ? `<div style="margin-top:8px;padding:10px 12px;border-radius:12px;background:rgba(235,87,87,0.14);border:1px solid rgba(235,87,87,0.45);color:#fca5a5;font-size:12.5px;"><b>⚠️ Recordatorio BOL Final de Entrega:</b> Faltan ${missingPods.length} (${missingPods.map(l => l.title.split('—')[0].trim()).join(', ')}) por subir firmados al entregar.</div>`
+        : "";
+      document.getElementById("loadsDesc").innerHTML = d.loadsNote + podAlertHtml;
+      document.getElementById("loadsList").innerHTML = d.loads.map(l => `
+        <div class="row-item">
+          <div>
+            <div class="row-title">${l.title}</div>
+            <div class="row-sub">${l.sub}</div>
+          </div>
+          <div class="row-right">
+            <div class="row-amount">${fmt(l.amount)}</div>
+            <span class="tag ${l.podMissing ? 'miss' : 'ok'}">${l.tag}</span>
+          </div>
+        </div>
+      `).join("");
+
+      document.getElementById("dieselHeaderAmt").textContent = fmt(d.diesel);
+      const dieselEl = document.getElementById("dieselList");
+      if (!d.fuels || d.fuels.length === 0) {
+        dieselEl.innerHTML = `
+          <div class="empty-state">
+            <b>$0.00 en Diésel registrado en Semana ${d.num} aún.</b><br/>
+            Los recibos de Greenlane y Mudflap que entren a <b>valtrixtransport@gmail.com</b> se archivarán aquí automáticamente.
+          </div>
+        `;
+      } else {
+        dieselEl.innerHTML = d.fuels.map(f => `
+          <div class="row-item">
+            <div>
+              <div class="row-title">${f.title}</div>
+              <div class="row-sub">${f.sub}</div>
+            </div>
+            <div class="row-right">
+              <div class="row-amount" style="color:#2dd4a0">-${fmt(f.amount)}</div>
+              <span class="tag ${f.ok ? 'ok' : 'prov'}">${f.tag}</span>
+            </div>
+          </div>
+        `).join("");
+      }
+    }
+
+    function selectWeek(w) {
+      activeWeek = w;
+      const fb = document.getElementById("noJsFallback");
+    if (fb) fb.style.display = "none";
+    render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function calcularAceite(isNewChange) {
+      const val = parseInt(document.getElementById("odoInput").value, 10);
+      if (!val || val < 240000) return;
+      currentOdo = val;
+      safeSet("valtrix_current_odo", String(currentOdo));
+      if (isNewChange) {
+        oilBase = val;
+        safeSet("valtrix_oil_base", String(oilBase));
+      }
+      renderOilUI();
+    }
+
+    function copiarWhatsApp() {
+      const d = WEEKS[activeWeek];
+      const drvName = d.driverName || "Orlando";
+      const drvPct = d.driverPct || 26;
+      const rem = (oilBase + 15000) - currentOdo;
+      const msg = [
+        `📊 *PANEL VALTRIX — SEMANA ${d.num}*`,
+        `${d.longDates}`,
+        `────────────────────`,
+        `💰 *Bruto:* ${fmt(d.gross)}`,
+        ...(d.rpmText ? [`🛣️ *A cómo sale la milla:* ${d.rpmText}`] : []),
+        `👨‍✈️ *${drvName} (${drvPct}%):* -${fmt(d.orlando)}`,
+        `🎧 *Henry (7%):* -${fmt(d.henry)}`,
+        `🏦 *Factoring (3.2%):* -${fmt(d.factoring)}`,
+        `⛽ *Diésel (${d.gallons.toFixed(3)} gal):* -${fmt(d.diesel)}`,
+        `🧾 *Gastos Semana:* -${fmt(d.other)}`,
+        `────────────────────`,
+        `✅ *NETA VALTRIX:* *${fmt(d.net)}*`,
+        `🛢️ *Cambio de Aceite (Hecho a las 259,862 mi):* Próximo a las ${(oilBase+15000).toLocaleString("en-US")} mi (${rem.toLocaleString("en-US")} mi restantes)`
+      ].join("\n");
+      navigator.clipboard.writeText(msg).then(() => {
+        const el = document.getElementById("copyMsg");
+        el.textContent = "✅ ¡Copiado! Pégalo en el WhatsApp de Karen.";
+        el.style.color = "#2dd4a0";
+      });
+    }
+
+    render();
+  </script>
+</body>
+</html>
